@@ -2,13 +2,14 @@ package i.am.eipeks.tic_tac_toe;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class Home extends AppCompatActivity {
+public class Home extends AppCompatActivity implements View.OnClickListener{
 
     private enum Value {
         ZERO, ONE
@@ -16,8 +17,7 @@ public class Home extends AppCompatActivity {
 
     private String[][] board;
 
-    @BindView(R.id.row0_column0)
-    Button row0_column0;
+    @BindView(R.id.row0_column0) Button row0_column0;
     @BindView(R.id.row0_column1) Button row0_column1;
     @BindView(R.id.row0_column2) Button row0_column2;
     @BindView(R.id.row1_column0) Button row1_column0;
@@ -27,7 +27,6 @@ public class Home extends AppCompatActivity {
     @BindView(R.id.row2_column1) Button row2_column1;
     @BindView(R.id.row2_column2) Button row2_column2;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +35,11 @@ public class Home extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setUpBoard();
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 
     private void setUpBoard(){
