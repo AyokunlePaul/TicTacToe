@@ -16,6 +16,9 @@ public class Home extends AppCompatActivity implements View.OnClickListener{
     }
 
     private String[][] board;
+    private boolean hasSelectedAButtonBefore;
+
+    private Button selectedButton;
 
     @BindView(R.id.row0_column0) Button row0_column0;
     @BindView(R.id.row0_column1) Button row0_column1;
@@ -39,6 +42,64 @@ public class Home extends AppCompatActivity implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.row0_column0:
+                if (!hasSelectedAButtonBefore){
+                    row0_column0.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row0_column1:
+                if (!hasSelectedAButtonBefore){
+                    row0_column1.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row0_column2:
+                if (!hasSelectedAButtonBefore){
+                    row0_column2.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row1_column0:
+                if (!hasSelectedAButtonBefore){
+                    row1_column0.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row1_column1:
+                if (!hasSelectedAButtonBefore){
+                    row1_column1.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row1_column2:
+                if (!hasSelectedAButtonBefore){
+                    row1_column2.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row2_column0:
+                if (!hasSelectedAButtonBefore){
+                    row2_column0.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row2_column1:
+                if (!hasSelectedAButtonBefore){
+                    row2_column1.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+            case R.id.row2_column2:
+                if (!hasSelectedAButtonBefore){
+                    row2_column2.setSelected(true);
+                    selectedButton.setSelected(false);
+                }
+                break;
+        }
+
+        selectedButton = findViewById(v.getId());
 
     }
 
@@ -56,6 +117,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener{
                 }
             }
         }
+        hasSelectedAButtonBefore = false;
         resetButtons();
     }
 
