@@ -189,4 +189,8 @@ public class Home extends AppCompatActivity implements View.OnClickListener{
         row2_column2.setOnClickListener(this);
     }
 
+    private void play(int fromRow, int fromColumn, int toRow, int toColumn){
+
+    }
+
 }
