@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -38,63 +39,102 @@ public class Home extends AppCompatActivity implements View.OnClickListener{
         ButterKnife.bind(this);
 
         setUpBoard();
+
+        setListeners();
+
     }
 
     @Override
     public void onClick(View v) {
+//        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show();
+
+        if (hasSelectedAButtonBefore){
+            if (selectedButton.getId() == v.getId()){
+                return;
+            }
+            hasSelectedAButtonBefore = false;
+        }
+
         switch (v.getId()){
             case R.id.row0_column0:
                 if (!hasSelectedAButtonBefore){
                     row0_column0.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row0_column1:
                 if (!hasSelectedAButtonBefore){
                     row0_column1.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row0_column2:
                 if (!hasSelectedAButtonBefore){
                     row0_column2.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row1_column0:
                 if (!hasSelectedAButtonBefore){
                     row1_column0.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row1_column1:
                 if (!hasSelectedAButtonBefore){
                     row1_column1.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row1_column2:
                 if (!hasSelectedAButtonBefore){
                     row1_column2.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row2_column0:
                 if (!hasSelectedAButtonBefore){
                     row2_column0.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row2_column1:
                 if (!hasSelectedAButtonBefore){
                     row2_column1.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
             case R.id.row2_column2:
                 if (!hasSelectedAButtonBefore){
                     row2_column2.setSelected(true);
-                    selectedButton.setSelected(false);
+                    hasSelectedAButtonBefore = true;
+                    if (selectedButton != null){
+                        selectedButton.setSelected(false);
+                    }
                 }
                 break;
         }
@@ -118,6 +158,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener{
             }
         }
         hasSelectedAButtonBefore = false;
+        selectedButton = null;
         resetButtons();
     }
 
@@ -131,6 +172,21 @@ public class Home extends AppCompatActivity implements View.OnClickListener{
         row2_column0.setText(getResources().getString(R.string.zero_text));
         row2_column1.setText(getResources().getString(R.string.zero_text));
         row2_column2.setText(getResources().getString(R.string.zero_text));
+
+        selectedButton = null;
+
+    }
+
+    private void setListeners(){
+        row0_column0.setOnClickListener(this);
+        row0_column1.setOnClickListener(this);
+        row0_column2.setOnClickListener(this);
+        row1_column0.setOnClickListener(this);
+        row1_column1.setOnClickListener(this);
+        row1_column2.setOnClickListener(this);
+        row2_column0.setOnClickListener(this);
+        row2_column1.setOnClickListener(this);
+        row2_column2.setOnClickListener(this);
     }
 
 }
