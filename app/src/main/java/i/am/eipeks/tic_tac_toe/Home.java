@@ -1,7 +1,9 @@
 package i.am.eipeks.tic_tac_toe;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +14,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,11 +31,9 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
     private boolean hasSelectedAButtonBefore, isDontShowChecked;
     private String textToPass;
 
-    private Value valueToPass, currentPlayer;
+    private Value currentPlayer;
 
     private Button fromButton, toButton;
-
-    private AlertDialog dialog;
 
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
@@ -46,6 +48,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
     @BindView(R.id.row2_column1) Button row2_column1;
     @BindView(R.id.row2_column2) Button row2_column2;
     @BindView(R.id.turn_text) TextView turnDisplay;
+    @BindView(R.id.game_result) TextView gameResult;
     private CheckBox warningCheck;
 
     private View view;
@@ -80,11 +83,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         } else {
             toButton = findViewById(v.getId());
             secondButtonSelected = getRowAndColumnOfButton(v.getId());
-            if (preferences.getBoolean(Value.IS_CHECKED.toString(), true)){
-                showDialog();
-            } else {
-                play(firstButtonSelected, secondButtonSelected);
-            }
+            play(firstButtonSelected, secondButtonSelected);
         }
     }
 
@@ -93,6 +92,11 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
 
         if (isEmptyBlock(getRowAndColumnOfButton(v.getId()))){
             Toast.makeText(this, "Cannot select empty block. Try again", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+        if (!doesItemBelongToYou(v.getId())){
+            Toast.makeText(this, "Cannot play opponent's piece", Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -200,6 +204,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         editor.apply();
     }
 
+    @SuppressLint("InflateParams")
     private void setUpBoard(){
         board = new Value[3][3];
         for (int row = 0; row < board.length; row++){
@@ -218,6 +223,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         ButterKnife.bind(view);
 
         currentPlayer = Value.PLAYER_ONE;
+        updateTurnDisplayText();
         resetButtons();
     }
 
@@ -264,25 +270,8 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         });
     }
 
-    private void showDialog(){
-        dialog = new AlertDialog.Builder(this)
-                .setView(view).setCancelable(false).setTitle("Play")
-                .setPositiveButton("PLAY", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        play(firstButtonSelected, secondButtonSelected);
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).create();
-        dialog.show();
-    }
-
     private void play(final int[] from, final int[] to){
-        valueToPass = board[from[0]][from[1]];
+        Value valueToPass = board[from[0]][from[1]];
         board[from[0]][from[1]] = Value.EMPTY;
         board[to[0]][to[1]] = valueToPass;
         if (valueToPass.equals(Value.X)){
@@ -297,6 +286,13 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         updateBlock();
 
         resetVariables();
+
+        if (hasWon()){
+            declareWinner();
+            return;
+        }
+
+        nextPlayer();
     }
 
     private boolean isEmptyBlock(int[] rowAndColumn){
@@ -391,9 +387,101 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         setUpBoard();
     }
 
-    private void nextPlayer(){
-        if (currentPlayer.equals(Value.PLAYER_ONE)){
+    private void updateTurnDisplayText(){
+        String currentPlayerString;
+        switch (currentPlayer){
+            case PLAYER_ONE:
+                currentPlayerString = "Player One";
+                turnDisplay.setText(String.format(Locale.ENGLISH, "%s turn", currentPlayerString));
+                break;
+            case PLAYER_TWO:
+                currentPlayerString = "Player Two";
+                turnDisplay.setText(String.format(Locale.ENGLISH, "%s turn", currentPlayerString));
+                break;
+            case COMPUTER:
+                currentPlayerString = "Computer";
+                turnDisplay.setText(String.format(Locale.ENGLISH, "%s turn", currentPlayerString));
+                break;
+        }
+    }
 
+    private void declareWinner(){
+        switch (currentPlayer){
+            case COMPUTER:
+                gameResult.setText(String.format(Locale.ENGLISH, "%s", "Computer wins"));
+                break;
+            case PLAYER_ONE:
+                gameResult.setText(String.format(Locale.ENGLISH, "%s", "Player 1 wins"));
+                break;
+            case PLAYER_TWO:
+                gameResult.setText(String.format(Locale.ENGLISH, "%s", "Player 2 wins"));
+                break;
+        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                gameResult.setText(String.format(Locale.ENGLISH, "%s", "Game result:"));
+            }
+        }, 1500);
+        setUpBoard();
+    }
+
+    private void nextPlayer(){
+        switch (currentPlayer) {
+            case PLAYER_ONE:
+                currentPlayer = Value.PLAYER_TWO;
+                break;
+            case PLAYER_TWO:
+                currentPlayer = Value.PLAYER_ONE;
+                break;
+            case COMPUTER:
+                currentPlayer = Value.PLAYER_ONE;
+                break;
+        }
+        updateTurnDisplayText();
+    }
+
+    private boolean hasWon(){
+        boolean hasWon = false;
+        for (int row = 0; row < 3; row++){
+            if (row == 0){
+                hasWon = (board[row][0] == board[row+1][0] && board[row+1][0] == board[row+2][0])
+                        || (board[row][1] == board[row+1][1] && board[row+1][1] == board[row+2][1])
+                        || (board[row][2] == board[row+1][2] && board[row+1][2] == board[row+2][2])
+
+                        || (board[row][0] == board[row+1][1] && board[row+1][1] == board[row+2][2]);
+                if (currentPlayer != Value.PLAYER_ONE && board[row][0] != Value.X){
+                    hasWon = (board[row][0] == board[row][1] && board[row][1] == board[row][2]);
+                }
+                if (hasWon){
+                    return hasWon;
+                }
+            } else if (row == 1){
+                hasWon = ((board[row][0] == board[row][1] && board[row][1] == board[row][2]));
+                if (hasWon){
+                    return hasWon;
+                }
+            } else{
+                hasWon = (board[row][0] == board[row-1][1] && board[row-1][1] == board[row-2][2]);
+                if (currentPlayer != Value.PLAYER_TWO && board[row][0] != Value.ZERO){
+                    hasWon = (board[row][0] == board[row][1] && board[row][1] == board[row][2]);
+                }
+                if (hasWon){
+                    return hasWon;
+                }
+            }
+        }
+        return hasWon;
+    }
+
+    private boolean doesItemBelongToYou(int id){
+        int[] item = getRowAndColumnOfButton(id);
+        switch (currentPlayer){
+            default:
+            case PLAYER_ONE:
+                return board[item[0]][item[1]] == Value.X;
+            case PLAYER_TWO:
+                return board[item[0]][item[1]] == Value.ZERO;
         }
     }
 }
