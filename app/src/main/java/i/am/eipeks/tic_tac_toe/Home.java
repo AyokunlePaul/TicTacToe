@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import butterknife.BindView;
@@ -44,6 +45,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
     @BindView(R.id.row2_column0) Button row2_column0;
     @BindView(R.id.row2_column1) Button row2_column1;
     @BindView(R.id.row2_column2) Button row2_column2;
+    @BindView(R.id.turn_text) TextView turnDisplay;
     private CheckBox warningCheck;
 
     private View view;
