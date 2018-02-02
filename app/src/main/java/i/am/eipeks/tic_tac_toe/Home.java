@@ -1,17 +1,10 @@
 package i.am.eipeks.tic_tac_toe;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.os.Handler;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,23 +13,19 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class Home extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
+public class Home extends AppCompatActivity implements View.OnClickListener {
 
     private enum Value {
-        ZERO, X, EMPTY, PLAYER_ONE, PLAYER_TWO, COMPUTER, IS_CHECKED
+        ZERO, X, EMPTY, PLAYER_ONE, PLAYER_TWO, COMPUTER
     }
 
+    private int movesCounter;
+
     private Value[][] board;
-    private int[] firstButtonSelected, secondButtonSelected;
-    private boolean hasSelectedAButtonBefore, isDontShowChecked;
-    private String textToPass;
 
     private Value currentPlayer;
 
-    private Button fromButton, toButton;
-
-    private SharedPreferences preferences;
-    private SharedPreferences.Editor editor;
+    private Button currentButton;
 
     @BindView(R.id.row0_column0) Button row0_column0;
     @BindView(R.id.row0_column1) Button row0_column1;
@@ -49,9 +38,8 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
     @BindView(R.id.row2_column2) Button row2_column2;
     @BindView(R.id.turn_text) TextView turnDisplay;
     @BindView(R.id.game_result) TextView gameResult;
-    private CheckBox warningCheck;
+    @BindView(R.id.restart_game) Button restartGame;
 
-    private View view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,148 +48,57 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
 
         ButterKnife.bind(this);
 
-        setUpSharedPreferences();
-
         setUpBoard();
-
-        warningCheck = view.findViewById(R.id.check_box);
 
         setListeners();
     }
 
     @Override
     public void onClick(View v) {
+        int id = v.getId();
 
-        if (!hasSelectedAButtonBefore){
-            Toast.makeText(this, "Long press to select block.", Toast.LENGTH_SHORT).show();
+        if (id == R.id.restart_game){
+            Restart(v);
             return;
         }
 
-        toButton = findViewById(v.getId());
-        if (hasSelectedAButtonBefore && !isValidMove(firstButtonSelected, getRowAndColumnOfButton(v.getId()))){
-            Toast.makeText(this, "Invalid move. Try again", Toast.LENGTH_SHORT).show();
-        } else {
-            toButton = findViewById(v.getId());
-            secondButtonSelected = getRowAndColumnOfButton(v.getId());
-            play(firstButtonSelected, secondButtonSelected);
-        }
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-
-        if (isEmptyBlock(getRowAndColumnOfButton(v.getId()))){
-            Toast.makeText(this, "Cannot select empty block. Try again", Toast.LENGTH_SHORT).show();
-            return true;
+        if (!isEmptyBlock(getRowAndColumnOfButton(id))){
+            Toast.makeText(this, "Invalid move.", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if (!doesItemBelongToYou(v.getId())){
-            Toast.makeText(this, "Cannot play opponent's piece", Toast.LENGTH_SHORT).show();
-            return true;
-        }
+        currentButton = findViewById(id);
+        play(id);
+//        switch (id){
+//            case R.id.row0_column0:
+//                play(id);
+//                break;
+//            case R.id.row0_column1:
+//                play(id);
+//                break;
+//            case R.id.row0_column2:
+//                play(id);
+//                break;
+//            case R.id.row1_column0:
+//
+//                break;
+//            case R.id.row1_column1:
+//
+//                break;
+//            case R.id.row1_column2:
+//
+//                break;
+//            case R.id.row2_column0:
+//
+//                break;
+//            case R.id.row2_column1:
+//
+//                break;
+//            case R.id.row2_column2:
+//
+//                break;
+//        }
 
-        if (hasSelectedAButtonBefore){
-            if (fromButton.getId() == v.getId()){
-                return true;
-            }
-            hasSelectedAButtonBefore = false;
-        } else {
-            firstButtonSelected = getRowAndColumnOfButton(v.getId());
-        }
-
-        switch (v.getId()){
-            case R.id.row0_column0:
-                if (!hasSelectedAButtonBefore){
-                    row0_column0.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row0_column1:
-                if (!hasSelectedAButtonBefore){
-                    row0_column1.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row0_column2:
-                if (!hasSelectedAButtonBefore){
-                    row0_column2.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row1_column0:
-                if (!hasSelectedAButtonBefore){
-                    row1_column0.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row1_column1:
-                if (!hasSelectedAButtonBefore){
-                    row1_column1.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row1_column2:
-                if (!hasSelectedAButtonBefore){
-                    row1_column2.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row2_column0:
-                if (!hasSelectedAButtonBefore){
-                    row2_column0.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row2_column1:
-                if (!hasSelectedAButtonBefore){
-                    row2_column1.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-            case R.id.row2_column2:
-                if (!hasSelectedAButtonBefore){
-                    row2_column2.setSelected(true);
-                    hasSelectedAButtonBefore = true;
-                    if (fromButton != null){
-                        fromButton.setSelected(false);
-                    }
-                }
-                break;
-        }
-
-        fromButton = findViewById(v.getId());
-
-        return true;
-    }
-
-    private void setUpSharedPreferences(){
-        preferences = getSharedPreferences("TicTacToe", MODE_PRIVATE);
-        editor = preferences.edit();
-        editor.apply();
     }
 
     @SuppressLint("InflateParams")
@@ -209,36 +106,36 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         board = new Value[3][3];
         for (int row = 0; row < board.length; row++){
             for (int column = 0; column < board[row].length; column++){
-                if (row == 0){
-                    board[row][column] = Value.X;
-                } else if (row == 2){
-                    board[row][column] = Value.ZERO;
-                } else {
-                    board[row][column] = Value.EMPTY;
-                }
+                board[row][column] = Value.EMPTY;
             }
         }
-
-        view = LayoutInflater.from(this).inflate(R.layout.play_dialog, null);
-        ButterKnife.bind(view);
-
-        currentPlayer = Value.PLAYER_ONE;
-        updateTurnDisplayText();
         resetButtons();
+        enableBoard(true);
+        updateTurnDisplayText();
     }
 
     private void resetButtons(){
-        row0_column0.setText(getResources().getString(R.string.x_text));
-        row0_column1.setText(getResources().getString(R.string.x_text));
-        row0_column2.setText(getResources().getString(R.string.x_text));
+        row0_column0.setText("");
+        row0_column1.setText("");
+        row0_column2.setText("");
         row1_column0.setText("");
         row1_column1.setText("");
         row1_column2.setText("");
-        row2_column0.setText(getResources().getString(R.string.zero_text));
-        row2_column1.setText(getResources().getString(R.string.zero_text));
-        row2_column2.setText(getResources().getString(R.string.zero_text));
+        row2_column0.setText("");
+        row2_column1.setText("");
+        row2_column2.setText("");
+
+        restartGame.setText(String.format(Locale.ENGLISH, "%s", "Restart"));
+
+        gameResult.setText(String.format(Locale.ENGLISH, "%s", "Game Result"));
 
         resetVariables();
+    }
+
+    private void resetVariables(){
+        currentButton = null;
+        currentPlayer = Value.PLAYER_ONE;
+        movesCounter = 0;
     }
 
     private void setListeners(){
@@ -252,70 +149,34 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         row2_column1.setOnClickListener(this);
         row2_column2.setOnClickListener(this);
 
-        row0_column0.setOnLongClickListener(this);
-        row0_column1.setOnLongClickListener(this);
-        row0_column2.setOnLongClickListener(this);
-        row1_column0.setOnLongClickListener(this);
-        row1_column1.setOnLongClickListener(this);
-        row1_column2.setOnLongClickListener(this);
-        row2_column0.setOnLongClickListener(this);
-        row2_column1.setOnLongClickListener(this);
-        row2_column2.setOnLongClickListener(this);
-
-        warningCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isDontShowChecked = isChecked;
-            }
-        });
+        restartGame.setOnClickListener(this);
     }
 
-    private void play(final int[] from, final int[] to){
-        Value valueToPass = board[from[0]][from[1]];
-        board[from[0]][from[1]] = Value.EMPTY;
-        board[to[0]][to[1]] = valueToPass;
-        if (valueToPass.equals(Value.X)){
-            textToPass = getString(R.string.x_text);
-        } else {
-            textToPass = getString(R.string.zero_text);
+    private void play(int id){
+        movesCounter += 1;
+        int rowColumn[] = getRowAndColumnOfButton(id);
+        switch (currentPlayer){
+            case PLAYER_ONE:
+                board[rowColumn[0]][rowColumn[1]] = Value.X;
+                updateBlock(Value.X);
+                break;
+            case PLAYER_TWO:
+                board[rowColumn[0]][rowColumn[1]] = Value.ZERO;
+                updateBlock(Value.ZERO);
+                break;
         }
-
-        editor.putBoolean(Value.IS_CHECKED.toString(), isDontShowChecked);
-        editor.apply();
-
-        updateBlock();
-
-        resetVariables();
-
-        if (hasWon()){
-            declareWinner();
+        if (checkForWinner()){
+            declareWinner(false);
+            return;
+        } else if (movesCounter == 9){
+            declareWinner(true);
             return;
         }
-
         nextPlayer();
     }
 
     private boolean isEmptyBlock(int[] rowAndColumn){
         return board[rowAndColumn[0]][rowAndColumn[1]].equals(Value.EMPTY);
-    }
-
-    private boolean isNextDiagonal(int[] from, int[] to){
-        return (Math.abs(from[0] - to[0]) == 1 && Math.abs(from[1] - to[1]) == 1);
-    }
-
-    private boolean isValidMove(int[] from, int[] to){
-        if (!isEmptyBlock(to)){
-            return false;
-        } else if (from[0] == to[0]){
-            return Math.abs(from[1] - to[1]) <= 1;
-        } else if (from[1] == to[1]){
-            return Math.abs(from[0] - to[0]) <= 1;
-        } else if (Math.abs(from[0] - to[0]) > 1 || Math.abs(from[1] - to[1]) > 1) {
-            return false;
-        } else if (isNextDiagonal(from, to)){
-            return true;
-        }
-        return false;
     }
 
     private int[] getRowAndColumnOfButton(int id){
@@ -363,24 +224,15 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         return new int[]{row, column};
     }
 
-    private void updateBlock(){
-        fromButton.setText("");
-        toButton.setText(textToPass);
-    }
-
-    private void resetVariables(){
-        hasSelectedAButtonBefore = false;
-
-        if (fromButton != null && toButton != null){
-            fromButton.setSelected(false);
-            toButton.setSelected(false);
+    private void updateBlock(Value value){
+        switch (value){
+            case X:
+                currentButton.setText(getString(R.string.x_text));
+                break;
+            case ZERO:
+                currentButton.setText(getString(R.string.zero_text));
+                break;
         }
-
-        fromButton = null;
-        toButton = null;
-
-        firstButtonSelected = null;
-        secondButtonSelected = null;
     }
 
     public void Restart(View view) {
@@ -405,7 +257,13 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         }
     }
 
-    private void declareWinner(){
+    private void declareWinner(boolean draw){
+        if (draw){
+            gameResult.setText(String.format(Locale.ENGLISH, "%s", "Draw"));
+            restartGame.setText(String.format(Locale.ENGLISH, "%s", "Play again"));
+            enableBoard(false);
+            return;
+        }
         switch (currentPlayer){
             case COMPUTER:
                 gameResult.setText(String.format(Locale.ENGLISH, "%s", "Computer wins"));
@@ -417,13 +275,9 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
                 gameResult.setText(String.format(Locale.ENGLISH, "%s", "Player 2 wins"));
                 break;
         }
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                gameResult.setText(String.format(Locale.ENGLISH, "%s", "Game result:"));
-            }
-        }, 1500);
-        setUpBoard();
+        restartGame.setText(String.format(Locale.ENGLISH, "%s", "Play again"));
+
+        enableBoard(false);
     }
 
     private void nextPlayer(){
@@ -441,47 +295,28 @@ public class Home extends AppCompatActivity implements View.OnClickListener, Vie
         updateTurnDisplayText();
     }
 
-    private boolean hasWon(){
-        boolean hasWon = false;
-        for (int row = 0; row < 3; row++){
-            if (row == 0){
-                hasWon = (board[row][0] == board[row+1][0] && board[row+1][0] == board[row+2][0])
-                        || (board[row][1] == board[row+1][1] && board[row+1][1] == board[row+2][1])
-                        || (board[row][2] == board[row+1][2] && board[row+1][2] == board[row+2][2])
+    @SuppressWarnings("ConstantConditions")
+    private boolean checkForWinner() {
+        return (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][0] != Value.EMPTY)
+                || (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[0][0] != Value.EMPTY)
+                || (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[0][1] != Value.EMPTY)
+                || (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[0][2] != Value.EMPTY)
+                || (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != Value.EMPTY)
+                || (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != Value.EMPTY)
+                || (board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] != Value.EMPTY)
+                || (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][0] != Value.EMPTY);
 
-                        || (board[row][0] == board[row+1][1] && board[row+1][1] == board[row+2][2]);
-                if (currentPlayer != Value.PLAYER_ONE && board[row][0] != Value.X){
-                    hasWon = (board[row][0] == board[row][1] && board[row][1] == board[row][2]);
-                }
-                if (hasWon){
-                    return hasWon;
-                }
-            } else if (row == 1){
-                hasWon = ((board[row][0] == board[row][1] && board[row][1] == board[row][2]));
-                if (hasWon){
-                    return hasWon;
-                }
-            } else{
-                hasWon = (board[row][0] == board[row-1][1] && board[row-1][1] == board[row-2][2]);
-                if (currentPlayer != Value.PLAYER_TWO && board[row][0] != Value.ZERO){
-                    hasWon = (board[row][0] == board[row][1] && board[row][1] == board[row][2]);
-                }
-                if (hasWon){
-                    return hasWon;
-                }
-            }
-        }
-        return hasWon;
     }
 
-    private boolean doesItemBelongToYou(int id){
-        int[] item = getRowAndColumnOfButton(id);
-        switch (currentPlayer){
-            default:
-            case PLAYER_ONE:
-                return board[item[0]][item[1]] == Value.X;
-            case PLAYER_TWO:
-                return board[item[0]][item[1]] == Value.ZERO;
-        }
+    private void enableBoard(boolean disable){
+        row0_column0.setEnabled(disable);
+        row0_column1.setEnabled(disable);
+        row0_column2.setEnabled(disable);
+        row1_column0.setEnabled(disable);
+        row1_column1.setEnabled(disable);
+        row1_column2.setEnabled(disable);
+        row2_column0.setEnabled(disable);
+        row2_column1.setEnabled(disable);
+        row2_column2.setEnabled(disable);
     }
 }
